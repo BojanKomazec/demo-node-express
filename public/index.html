@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #map { height: 400px; width: 80%; margin: auto; border-radius: 10px; }
+        #weather-info { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h2>Click on the Map to Get Weather Info</h2>
+    <div id="map"></div>
+    <div id="weather-info"><p>Select a location to see weather data.</p></div>
+
+    <script>
+        // Initialize map
+        var map = L.map('map').setView([51.5074, -0.1278], 3); // Default: London
+
+        // Add tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker;
+
+        // Map click event
+        map.on('click', function (e) {
+            var lat = e.latlng.lat;
+            var lon = e.latlng.lng;
+
+            // Remove previous marker if exists
+            if (marker) map.removeLayer(marker);
+
+            // Add new marker
+            marker = L.marker([lat, lon]).addTo(map);
+
+            // Fetch weather data
+            fetch(`/api/weather?lat=${lat}&lon=${lon}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('weather-info').innerHTML = `
+                        <h3>Weather at (${lat.toFixed(4)}, ${lon.toFixed(4)})</h3>
+                        <p>Temperature: ${data.current_weather.temperature}°C</p>
+                        <p>Wind Speed: ${data.current_weather.windspeed} km/h</p>
+                        <p>Weather Code: ${data.current_weather.weathercode}</p>
+                        <p>Time: ${data.current_weather.time}</p>
+                    `;
+                })
+                .catch(error => {
+                    document.getElementById('weather-info').innerHTML = "<p>Failed to load weather data.</p>";
+                    console.error("Error fetching weather data:", error);
+                });
+        });
+    </script>
+
+</body>
+</html>
