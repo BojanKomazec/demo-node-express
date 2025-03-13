@@ -8,7 +8,6 @@ router.get("/", (req, res) => {
   res.json({ message: "Hello from Express + TypeScript!" });
 });
 
-
 router.get("/time", (req, res) => {
     const currentTime = moment().format("DD-MM-YYYY HH:mm:ss");
     res.json({ time: currentTime });
@@ -43,12 +42,12 @@ router.get("/weather-london", async (req, res) => {
 router.get("/weather", async (req: Request, res: Response) => {
     try {
       const { lat, lon } = req.query;
-  
+
       if (!lat || !lon) {
          res.status(400).json({ error: "Latitude and Longitude are required" });
          return;
       }
-  
+
       const response = await axios.get("https://api.open-meteo.com/v1/forecast", {
         params: {
           latitude: lat,
@@ -56,12 +55,11 @@ router.get("/weather", async (req: Request, res: Response) => {
           current_weather: true
         }
       });
-  
+
       res.json(response.data);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch weather data" });
     }
 });
-
 
 export default router;

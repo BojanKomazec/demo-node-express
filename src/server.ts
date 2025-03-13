@@ -11,9 +11,7 @@ app.use(express.json()); // Middleware to parse JSON
 // http://localhost:3000/api/weather-london
 app.use("/api", routes);
 
-
 app.use(express.static(path.join(__dirname, "../public"))); // Serve static files
-
 
 // app.get('/', (req, res) => {
 //   res.send('Hello, TypeScript Express!');
@@ -22,4 +20,3 @@ app.use(express.static(path.join(__dirname, "../public"))); // Serve static file
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
-
