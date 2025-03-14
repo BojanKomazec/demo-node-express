@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Map</title>
+    
+    <!-- Include Leaflet -->
+    <!-- Load Leaflet from the Express server -->
+    <!-- link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /-->
+    <!-- script src="https://unpkg.com/leaflet/dist/leaflet.js"></script-->
+    <script src="/libs/leaflet/leaflet.js"></script>
+    <link rel="stylesheet" href="/libs/leaflet/leaflet.css" />
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #map { height: 400px; width: 80%; margin: auto; border-radius: 10px; }
+        #weather-info { margin-top: 20px; }
+    </style>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <!--script src="script.js"></script-->
+
+    <!-- Header with link to index page -->
+    <header>
+        <nav>
+            <a href="/">🏠 Home</a>
+        </nav>
+    </header>
+
+    <!-- Main content (Weather Map) -->
+
+    <h2>Click on the Map to Get Weather Info</h2>
+    <div id="map"></div>
+    <div id="weather-info"><p>Select a location to see weather data.</p></div>
+
+    <script>
+        // let isDoubleClick = false; // Flag to track double-click events
+        let clickTimeout; // To track the delay between clicks
+
+        // Initialize map
+        var map = L.map('map',{
+            doubleClickZoom: true, // Allow double-click to zoom in
+        }).setView([51.5074, -0.1278], 3); // Default: London
+
+        // Change cursor when dragging
+        map.on("mousedown", function () {
+        document.getElementById("map").classList.add("dragging");
+        });
+
+        map.on("mouseup", function () {
+        document.getElementById("map").classList.remove("dragging");
+        });
+
+        // Add tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker;
+
+        // Map click event
+        map.on('click', function (e) {
+            // console.log("Clicked at", e.latlng, "isDoubleClick = ", isDoubleClick);
+            // if (isDoubleClick)
+            //     return; // Ignore click if it's part of a double-click
+
+            // Clear any previous clickTimeout (meaning a double-click was not detected)
+            clearTimeout(clickTimeout);
+
+            // Set a timeout to check if a second click happens (which would trigger dblclick)
+            clickTimeout = setTimeout(() => {
+                var lat = e.latlng.lat;
+                var lon = e.latlng.lng;
+
+                // Remove previous marker if exists
+                if (marker) map.removeLayer(marker);
+
+                // Remove existing markers if you want only one pin at a time
+                // map.eachLayer((layer) => {
+                //     if (layer instanceof L.Marker) {
+                //     map.removeLayer(layer);
+                //     }
+                // });
+
+                // Add new marker
+                marker = L.marker([lat, lon]).addTo(map);
+
+                // Fetch weather data
+                fetch(`/api/weather?lat=${lat}&lon=${lon}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('weather-info').innerHTML = `
+                            <h3>Weather at (${lat.toFixed(4)}, ${lon.toFixed(4)})</h3>
+                            <p>Temperature: ${data.current_weather.temperature}°C</p>
+                            <p>Wind Speed: ${data.current_weather.windspeed} km/h</p>
+                            <p>Weather Code: ${data.current_weather.weathercode}</p>
+                            <p>Time: ${data.current_weather.time}</p>
+                        `;
+                    })
+                    .catch(error => {
+                        document.getElementById('weather-info').innerHTML = "<p>Failed to load weather data.</p>";
+                        console.error("Error fetching weather data:", error);
+                    });
+            }, 200); // Wait Xms before deciding it's a single click
+        });
+
+        // Prevent adding a pin on double-click
+        map.on("dblclick", function (e) {
+            // console.log("Double-clicked at ", e.latlng);
+
+            // Cancel the single-click marker addition
+            clearTimeout(clickTimeout);
+
+            // Stop the event from adding a marker
+            e.originalEvent.stopPropagation();
+        });
+    </script>
+
+</body>
+</html>

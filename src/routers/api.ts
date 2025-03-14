@@ -2,19 +2,26 @@ import express from "express";
 import { Request, Response } from "express";
 import moment from "moment";
 import axios from "axios"; // for HTTP requests
-const router = express.Router();
+import path from "path";
 
-router.get("/", (req, res) => {
-  res.json({ message: "Hello from Express + TypeScript!" });
-});
+const apiRouter = express.Router();
 
-router.get("/time", (req, res) => {
+// router.get("/", (req, res) => {
+//   res.json({ message: "Hello from Express + TypeScript!" });
+// });
+
+// Serve the landing page at root path
+// router.get("/", (req: Request, res: Response) => {
+//     res.sendFile(path.join(__dirname, "../public/landing.html"));
+// });
+
+apiRouter.get("/time", (req, res) => {
     const currentTime = moment().format("DD-MM-YYYY HH:mm:ss");
     res.json({ time: currentTime });
   });
 
 // New Route: Fetch data from a remote API
-router.get("/fetch-todo", async (req, res) => {
+apiRouter.get("/fetch-todo", async (req, res) => {
     try {
       const response = await axios.get("https://jsonplaceholder.typicode.com/todos/1");
       res.json(response.data);
@@ -23,7 +30,7 @@ router.get("/fetch-todo", async (req, res) => {
     }
   });
 
-router.get("/weather-london", async (req, res) => {
+  apiRouter.get("/weather-london", async (req, res) => {
     try {
         const response = await axios.get("https://api.open-meteo.com/v1/forecast", {
         params: {
@@ -39,7 +46,7 @@ router.get("/weather-london", async (req, res) => {
     }
 });
 
-router.get("/weather", async (req: Request, res: Response) => {
+apiRouter.get("/weather", async (req: Request, res: Response) => {
     try {
       const { lat, lon } = req.query;
 
@@ -62,4 +69,4 @@ router.get("/weather", async (req: Request, res: Response) => {
     }
 });
 
-export default router;
+export default apiRouter;

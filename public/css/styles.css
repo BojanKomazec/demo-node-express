@@ -1,0 +1,28 @@
+/* Header */
+header {
+    background-color: #333;
+    padding: 10px;
+    text-align: center;
+}
+
+header a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+
+/* Default state (hovering over the map) */
+#map {
+    cursor: url('/images/pin.png') 16 32, auto; /* Adjust path if needed */
+}
+
+/* When the user is dragging (left mouse button down) */
+#map.dragging {
+    cursor: grabbing;
+}
